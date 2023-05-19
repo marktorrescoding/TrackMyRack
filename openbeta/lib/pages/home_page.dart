@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Climbing App'),
+        title: Text('ASCENSUS'),
       ),
       body: Column(
         children: [
@@ -64,7 +64,13 @@ class _HomePageState extends State<HomePage> {
                           );
                         },
                         child: ListTile(
-                          title: Text('${snapshot.data![index].name} (YDS: ${snapshot.data![index].yds})'),
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(snapshot.data![index].name),
+                              Text('${snapshot.data![index].yds}'),
+                            ],
+                          ),
                         ),
                       );
                     },
