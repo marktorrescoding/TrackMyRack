@@ -43,6 +43,11 @@ class ApiService {
             climbs {
               name
               yds
+              content {
+                description
+                location
+                protection
+              }
             }
           }
         }
@@ -59,12 +64,13 @@ class ApiService {
       throw Exception('Failed to load climbs');
     }
 
-    List<ClimbingRoute> climbs = [];
-    for (var area in result.data?['areas']) {
-      if (area['climbs'] != null) {
-        climbs += (area['climbs'] as List<dynamic>).map((json) => ClimbingRoute.fromJson(json)).toList();
-      }
-    }
+    List<ClimbingRoute> climbs = (result.data?['areas'] as List<dynamic>)
+        .expand((area) =>
+        (area['climbs'] as List<dynamic>).map((climb) =>
+            ClimbingRoute.fromJson(climb))
+    )
+        .toList();
+
     return climbs;
   }
 
@@ -75,6 +81,11 @@ class ApiService {
           climb(filter: {name: {match: \$climbName, exactMatch: true}}) {
             name
             yds
+            content {
+              description
+              location
+              protection
+            }
           }
         }
       '''),
@@ -93,4 +104,5 @@ class ApiService {
     final Map<String, dynamic> json = result.data?['climb'][0] as Map<String, dynamic>;
     return ClimbingRoute.fromJson(json);
   }
+
 }
