@@ -1,47 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:openbeta/models/gear.dart';
-import 'package:openbeta/services/database_helper.dart';
+import 'database_helper.dart';
 
 class ViewMyRackPage extends StatelessWidget {
-  final GearService gearService = GearService();
+  final dbHelper = DatabaseHelper();
+
+  Future<List<Gear>> fetchGearEntries() async {
+    final db = await dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query('your_table_name');
+    return List.generate(maps.length, (index) {
+      return Gear(
+        maps[index]['category'],
+        maps[index]['item'],
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('View My Rack'),
+        title: Text('My Rack'),
       ),
-      body: FutureBuilder<List<GearItem>>(
-        future: gearService.getGearItems(),
+      body: FutureBuilder<List<Gear>>(
+        future: fetchGearEntries(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+            return Center(child: CircularProgressIndicator());
           }
-
           if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
-
-          final gearItems = snapshot.data;
-
-          if (gearItems == null || gearItems.isEmpty) {
-            return Center(
-              child: Text('No gear items found.'),
-            );
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No gear entries found.'));
           }
-
           return ListView.builder(
-            itemCount: gearItems.length,
+            itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
-              final gearItem = gearItems[index];
+              final gear = snapshot.data![index];
               return ListTile(
-                title: Text(gearItem.name),
-                subtitle: Text(gearItem.type),
-                // Add other properties as needed
+                title: Text(gear.category),
+                subtitle: Text(gear.item),
               );
             },
           );

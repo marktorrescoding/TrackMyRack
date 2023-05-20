@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'edit_rack_page.dart';
+import 'view_my_rack_page.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -29,7 +30,10 @@ class HomePage extends StatelessWidget {
             ElevatedButton(
               child: Text('View Rack'),
               onPressed: () {
-                // Navigate to view rack page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ViewMyRackPage()),
+                );
               },
             ),
             ElevatedButton(

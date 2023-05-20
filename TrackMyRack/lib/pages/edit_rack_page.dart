@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'database_helper.dart';
+
 
 class EditRackPage extends StatefulWidget {
   @override
@@ -8,6 +10,7 @@ class EditRackPage extends StatefulWidget {
 class _EditRackPageState extends State<EditRackPage> {
   String? selectedCategory;
   String? selectedItem;
+  final dbHelper = DatabaseHelper();
 
   final Map<String, List<String>> categories = {
     'Protection': ['Nuts', 'Cams', 'Tricams'],
@@ -22,12 +25,20 @@ class _EditRackPageState extends State<EditRackPage> {
     });
   }
 
-  void selectItem(String item) {
+  void selectItem(String item) async {
     setState(() {
       selectedItem = item;
     });
-    // Handle adding the selected item to the rack here...
+
+    if (selectedCategory != null && selectedItem != null) {
+      // Create a Gear instance
+      Gear gear = Gear(selectedCategory!, selectedItem!);
+
+      // Save the gear entry to the database
+      await dbHelper.insertGear(gear);
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
