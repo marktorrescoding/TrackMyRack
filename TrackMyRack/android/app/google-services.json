@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "701607221268",
+    "project_id": "trackmyrack",
+    "storage_bucket": "trackmyrack.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:701607221268:android:88120c245b57e9235c6f01",
+        "android_client_info": {
+          "package_name": "com.example.openbeta"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "701607221268-fb4gei5dnkur42ii4dnbfdri7p3sco4a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZ7UQq7K_s-1FTnz8V-YQVOHEKsABRuUw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "701607221268-fb4gei5dnkur42ii4dnbfdri7p3sco4a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
