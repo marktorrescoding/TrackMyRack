@@ -1,17 +1,43 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
 
-class ViewMyRackPage extends StatelessWidget {
-  final dbHelper = DatabaseHelper();
+class ViewMyRackPage extends StatefulWidget {
+  @override
+  _ViewMyRackPageState createState() => _ViewMyRackPageState();
+}
 
-  Future<List<Gear>> fetchGearEntries() async {
+class _ViewMyRackPageState extends State<ViewMyRackPage> {
+  final dbHelper = DatabaseHelper();
+  List<Gear> gearEntries = [];
+  List<bool> itemExpandedList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchGearEntries();
+  }
+
+  Future<void> fetchGearEntries() async {
     final db = await dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query('your_table_name');
-    return List.generate(maps.length, (index) {
-      return Gear(
-        maps[index]['category'],
-        maps[index]['item'],
-      );
+    setState(() {
+      gearEntries = List.generate(maps.length, (index) {
+        return Gear(
+          maps[index]['category'],
+          maps[index]['item'],
+          maps[index]['name'],
+          maps[index]['details'],
+          maps[index]['manufacturedDate'],
+          maps[index]['strength'],
+        );
+      });
+      itemExpandedList = List.generate(maps.length, (index) => false);
+    });
+  }
+
+  void toggleItemExpanded(int index) {
+    setState(() {
+      itemExpandedList[index] = !itemExpandedList[index];
     });
   }
 
@@ -21,27 +47,31 @@ class ViewMyRackPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('My Rack'),
       ),
-      body: FutureBuilder<List<Gear>>(
-        future: fetchGearEntries(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No gear entries found.'));
-          }
-          return ListView.builder(
-            itemCount: snapshot.data!.length,
-            itemBuilder: (context, index) {
-              final gear = snapshot.data![index];
-              return ListTile(
-                title: Text(gear.category),
-                subtitle: Text(gear.item),
-              );
+      body: ListView.builder(
+        itemCount: gearEntries.length,
+        itemBuilder: (context, index) {
+          final gear = gearEntries[index];
+          return ExpansionTile(
+            title: Text(gear.category),
+            subtitle: Text(gear.item),
+            onExpansionChanged: (expanded) {
+              toggleItemExpanded(index);
             },
+            children: [
+              ListTile(
+                title: Text('Name: ${gear.name}'),
+              ),
+              ListTile(
+                title: Text('Details: ${gear.details}'),
+              ),
+              ListTile(
+                title: Text('Manufactured Date: ${gear.manufacturedDate}'),
+              ),
+              ListTile(
+                title: Text('Strength: ${gear.strength}'),
+              ),
+            ],
+            initiallyExpanded: itemExpandedList[index],
           );
         },
       ),
