@@ -9,28 +9,58 @@ class EditRackPage extends StatefulWidget {
 class _EditRackPageState extends State<EditRackPage> {
   final dbHelper = DatabaseHelper();
   String? selectedCategory;
+  String? selectedSubCategory;
   String? selectedItem;
+  String? selectedBrand;
   TextEditingController nameController = TextEditingController();
   TextEditingController detailsController = TextEditingController();
   TextEditingController manufacturedDateController = TextEditingController();
   TextEditingController strengthController = TextEditingController();
 
-  final Map<String, List<String>> categories = {
-    'Protection': ['Nuts', 'Cams', 'Tricams'],
-    'Soft Goods': ['Slings', 'Loops'],
-    'Hardware': ['Carabiner', 'Quick draw'],
-    // Add more categories and sub-categories here...
+  final Map<String, Map<String, List<String>>> categories = {
+    'Protection': {
+      'Cams': ['Brand 1', 'Brand 2', 'Brand 3'],
+      'Nuts': ['Brand 1', 'Brand 2', 'Brand 3'],
+      'Tricams': ['Brand 1', 'Brand 2', 'Brand 3'],
+    },
+    'Soft Goods': {
+      'Slings': ['Brand 1', 'Brand 2', 'Brand 3'],
+      'Loops': ['Brand 1', 'Brand 2', 'Brand 3'],
+    },
+    'Hardware': {
+      'Carabiner': ['Brand 1', 'Brand 2', 'Brand 3'],
+      'Quick draw': ['Brand 1', 'Brand 2', 'Brand 3'],
+    },
+    // Add more categories, sub-categories, and brands here...
   };
 
   void selectCategory(String category) {
     setState(() {
       selectedCategory = category;
+      selectedSubCategory = null;
+      selectedItem = null;
+      selectedBrand = null;
+    });
+  }
+
+  void selectSubCategory(String subCategory) {
+    setState(() {
+      selectedSubCategory = subCategory;
+      selectedItem = null;
+      selectedBrand = null;
     });
   }
 
   void selectItem(String item) {
     setState(() {
       selectedItem = item;
+      selectedBrand = null;
+    });
+  }
+
+  void selectBrand(String brand) {
+    setState(() {
+      selectedBrand = brand;
     });
     _showGearEntryDialog();
   }
@@ -75,7 +105,9 @@ class _EditRackPageState extends State<EditRackPage> {
                 // Create a Gear instance
                 Gear gear = Gear(
                   selectedCategory!,
+                  selectedSubCategory!,
                   selectedItem!,
+                  selectedBrand!,
                   name,
                   details,
                   manufacturedDate,
@@ -130,23 +162,71 @@ class _EditRackPageState extends State<EditRackPage> {
               );
             }).toList(),
           ),
-          if (selectedCategory != null) ...[
-            SizedBox(height: 20.0), // Add some spacing
-            Text(
-              'Sub-categories for $selectedCategory:',
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-            ),
-            Wrap(
-              spacing: 8.0, // gap between adjacent chips
-              runSpacing: 4.0, // gap between lines
-              children: categories[selectedCategory]!.map((String item) {
-                return ElevatedButton(
-                  child: Text(item),
-                  onPressed: () => selectItem(item),
-                );
-              }).toList(),
-            ),
-          ],
+          if (selectedCategory != null && categories[selectedCategory!] != null)
+            ...[
+              SizedBox(height: 20.0), // Add some spacing
+              Text(
+                'Sub-categories for $selectedCategory:',
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              ),
+              Wrap(
+                spacing: 8.0, // gap between adjacent chips
+                runSpacing: 4.0, // gap between lines
+                children: categories[selectedCategory!]!.keys
+                    .map((String subCategory) {
+                  return ElevatedButton(
+                    child: Text(subCategory),
+                    onPressed: () => selectSubCategory(subCategory),
+                  );
+                }).toList(),
+              ),
+            ],
+          if (selectedSubCategory != null &&
+              categories[selectedCategory!]![selectedSubCategory!] != null)
+            ...[
+              SizedBox(height: 20.0), // Add some spacing
+              Text(
+                'Items for $selectedSubCategory:',
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              ),
+              Wrap(
+                spacing: 8.0, // gap between adjacent chips
+                runSpacing: 4.0, // gap between lines
+                children: categories[selectedCategory!]![selectedSubCategory!]!
+                    .map((String item) {
+                  return ElevatedButton(
+                    child: Text(item),
+                    onPressed: () => selectItem(item),
+                  );
+                }).toList(),
+              ),
+            ],
+          if (selectedItem != null &&
+              categories[selectedCategory!]![selectedSubCategory!]!
+                  .contains(selectedItem!) &&
+              categories[selectedCategory!]![selectedSubCategory!]!
+                  .indexOf(selectedItem!) >=
+                  0)
+            ...[
+              SizedBox(height: 20.0), // Add some spacing
+              Text(
+                'Brands for $selectedItem:',
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              ),
+              Wrap(
+                spacing: 8.0, // gap between adjacent chips
+                runSpacing: 4.0, // gap between lines
+                children: [
+                  for (String brand in categories[selectedCategory!]![
+                  selectedSubCategory!]!)
+                    if (brand == selectedItem)
+                      ElevatedButton(
+                        child: Text(brand),
+                        onPressed: () => selectBrand(brand),
+                      ),
+                ],
+              ),
+            ],
         ],
       ),
     );

@@ -26,7 +26,7 @@ class DatabaseHelper {
       path,
       version: 1,
       onCreate: (db, version) async {
-        await db.execute('CREATE TABLE your_table_name (id INTEGER PRIMARY KEY, category TEXT, item TEXT, name TEXT, details TEXT, manufacturedDate TEXT, strength TEXT)');
+        await db.execute('CREATE TABLE your_table_name (id INTEGER PRIMARY KEY, category TEXT, subCategory TEXT, item TEXT, brand TEXT, name TEXT, details TEXT, manufacturedDate TEXT, strength TEXT)');
 
         // Create other tables if needed
       },
@@ -41,7 +41,9 @@ class DatabaseHelper {
 
 class Gear {
   String category;
+  String subCategory;
   String item;
+  String brand;
   String name;
   String details;
   String manufacturedDate;
@@ -49,7 +51,9 @@ class Gear {
 
   Gear(
       this.category,
+      this.subCategory,
       this.item,
+      this.brand,
       this.name,
       this.details,
       this.manufacturedDate,
@@ -59,7 +63,9 @@ class Gear {
   Map<String, dynamic> toMap() {
     return {
       'category': category,
+      'subCategory': subCategory,
       'item': item,
+      'brand': brand,
       'name': name,
       'details': details,
       'manufacturedDate': manufacturedDate,
