@@ -8,8 +8,7 @@ class ViewMyRackPage extends StatefulWidget {
 
 class _ViewMyRackPageState extends State<ViewMyRackPage> {
   final dbHelper = DatabaseHelper();
-  List<Gear> gearEntries = [];
-  List<bool> itemExpandedList = [];
+  List<CategoryGroup> categoryGroups = [];
 
   @override
   void initState() {
@@ -20,25 +19,33 @@ class _ViewMyRackPageState extends State<ViewMyRackPage> {
   Future<void> fetchGearEntries() async {
     final db = await dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query('your_table_name');
-    setState(() {
-      gearEntries = List.generate(maps.length, (index) {
-        return Gear(
-          maps[index]['category'],
-          maps[index]['item'],
-          maps[index]['name'],
-          maps[index]['details'],
-          maps[index]['manufacturedDate'],
-          maps[index]['strength'],
-        );
-      });
-      itemExpandedList = List.generate(maps.length, (index) => false);
-    });
-  }
 
-  void toggleItemExpanded(int index) {
-    setState(() {
-      itemExpandedList[index] = !itemExpandedList[index];
+    List<Gear> gearEntries = List.generate(maps.length, (index) {
+      return Gear(
+        maps[index]['category'],
+        maps[index]['item'],
+        maps[index]['name'],
+        maps[index]['details'],
+        maps[index]['manufacturedDate'],
+        maps[index]['strength'],
+      );
     });
+
+    // Group gear entries by category
+    categoryGroups = [];
+    for (var gear in gearEntries) {
+      var group = categoryGroups.firstWhere(
+            (categoryGroup) => categoryGroup.category == gear.category,
+        orElse: () {
+          var newGroup = CategoryGroup(category: gear.category, gearList: []);
+          categoryGroups.add(newGroup);
+          return newGroup;
+        },
+      );
+      group.gearList.add(gear);
+    }
+
+    setState(() {});
   }
 
   @override
@@ -48,33 +55,66 @@ class _ViewMyRackPageState extends State<ViewMyRackPage> {
         title: Text('My Rack'),
       ),
       body: ListView.builder(
-        itemCount: gearEntries.length,
-        itemBuilder: (context, index) {
-          final gear = gearEntries[index];
-          return ExpansionTile(
-            title: Text(gear.category),
-            subtitle: Text(gear.item),
-            onExpansionChanged: (expanded) {
-              toggleItemExpanded(index);
-            },
+        itemCount: categoryGroups.length,
+        itemBuilder: (context, categoryIndex) {
+          final categoryGroup = categoryGroups[categoryIndex];
+          return Column(
             children: [
               ListTile(
-                title: Text('Name: ${gear.name}'),
+                title: Text(
+                  categoryGroup.category,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                onTap: () {
+                  setState(() {
+                    categoryGroup.isExpanded = !categoryGroup.isExpanded;
+                  });
+                },
               ),
-              ListTile(
-                title: Text('Details: ${gear.details}'),
-              ),
-              ListTile(
-                title: Text('Manufactured Date: ${gear.manufacturedDate}'),
-              ),
-              ListTile(
-                title: Text('Strength: ${gear.strength}'),
-              ),
+              if (categoryGroup.isExpanded)
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    physics: ClampingScrollPhysics(),
+                    itemCount: categoryGroup.gearList.length,
+                    itemBuilder: (context, itemIndex) {
+                      final gear = categoryGroup.gearList[itemIndex];
+                      return ExpansionTile(
+                        title: Text(gear.item),
+                        children: [
+                          ListTile(
+                            title: Text(gear.name),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Details: ${gear.details}'),
+                                Text('Manufactured Date: ${gear.manufacturedDate}'),
+                                Text('Strength: ${gear.strength}'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
             ],
-            initiallyExpanded: itemExpandedList[index],
           );
         },
       ),
     );
   }
+}
+
+class CategoryGroup {
+  String category;
+  List<Gear> gearList;
+  bool isExpanded;
+
+  CategoryGroup({
+    required this.category,
+    required this.gearList,
+    this.isExpanded = false,
+  });
 }
